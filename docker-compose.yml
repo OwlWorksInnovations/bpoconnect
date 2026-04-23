@@ -47,13 +47,13 @@ services:
         condition: service_healthy
 
   frontend:
-    build:
-      context: ./frontend
+    build: ./frontend
     container_name: bpo-frontend
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - INTERNAL_BACKEND_URL=http://backend:8080
+      - NEXT_PUBLIC_API_URL=http://localhost:8080 # For client-side browser fetches
     depends_on:
       - backend
 
