@@ -1,0 +1,253 @@
+{
+  "users": [
+    {
+      "id": "15131fde-d6ec-432c-b5cd-908488234098",
+      "name": "Peter Janssen ",
+      "email": "janssenpwj@gmail.com",
+      "role": "client"
+    },
+    {
+      "id": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "name": "Juan",
+      "email": "feaf@example.com",
+      "role": "freelancer",
+      "tags": [
+        "Website"
+      ]
+    },
+    {
+      "id": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "name": "Kobus Button",
+      "email": "kobusbutton@gmail.com",
+      "role": "client"
+    },
+    {
+      "id": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "name": "Peter Janssen ",
+      "email": "pppp@klkkl",
+      "role": "freelancer",
+      "tags": [
+        "Basketball"
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "id": "9cb06666-35f0-450d-9b72-17b784435ed2",
+      "title": "website ",
+      "description": "need website for bpo ",
+      "budget": 1000,
+      "tags": [
+        "website developer"
+      ],
+      "authorId": "15131fde-d6ec-432c-b5cd-908488234098",
+      "status": "open"
+    },
+    {
+      "id": "9b902930-c9e1-4cc9-a7c7-9581312671d7",
+      "title": "Website",
+      "description": "need it done today",
+      "budget": 10000,
+      "tags": [
+        "website"
+      ],
+      "authorId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "status": "open"
+    }
+  ],
+  "offers": [
+    {
+      "id": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "jobId": "9cb06666-35f0-450d-9b72-17b784435ed2",
+      "freelancerId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "amount": 1000,
+      "message": "Cause you should lil bro",
+      "status": "pending"
+    },
+    {
+      "id": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "jobId": "9b902930-c9e1-4cc9-a7c7-9581312671d7",
+      "freelancerId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "amount": 10000,
+      "message": "cuz im him",
+      "status": "pending"
+    }
+  ],
+  "messages": [
+    {
+      "id": "4e8c0a8a-50e8-4aca-bedc-cb9b8e4c9dcf",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "Cause you should lil bro",
+      "createdAt": 1776935448792
+    },
+    {
+      "id": "2362096d-4d54-48d2-9fc6-f8170c83dfef",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "15131fde-d6ec-432c-b5cd-908488234098",
+      "text": "you seem to know what your talking about",
+      "createdAt": 1776935474096
+    },
+    {
+      "id": "63a4be66-0c2f-4fe7-a06b-0c739402900d",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "I do yeah and your gonna give me this job and ima make you rich",
+      "createdAt": 1776935491386
+    },
+    {
+      "id": "ecf998c2-6285-4300-97c7-fb12792e9179",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "I do yeah and your gonna give me this job and ima make you rich",
+      "createdAt": 1776935496259
+    },
+    {
+      "id": "017af9ae-0c8b-49b2-b034-1062bbf2cc91",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "I do yeah and your gonna give me this job and ima make you rich",
+      "createdAt": 1776935498217
+    },
+    {
+      "id": "ab88ff68-ed94-4770-ad85-56b649c00ea6",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "I do yeah and your gonna give me this job and ima make you rich",
+      "createdAt": 1776935500168
+    },
+    {
+      "id": "d57bd951-1452-4016-b78b-d2d7e1be6adf",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "15131fde-d6ec-432c-b5cd-908488234098",
+      "text": "you seem to know what your talking about",
+      "createdAt": 1776935503542
+    },
+    {
+      "id": "14444f1a-aeda-4ae9-8c00-84bc4dbda2ed",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "15131fde-d6ec-432c-b5cd-908488234098",
+      "text": "yay",
+      "createdAt": 1776935530774
+    },
+    {
+      "id": "93277d46-d40d-4294-9b86-f706ac89c2ad",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "c71eb81e-9275-48e8-afdc-986b31ccf3c3",
+      "text": "I do yeah and your gonna give me this job and ima make you rich",
+      "createdAt": 1776935581879
+    },
+    {
+      "id": "0fbf2757-95a4-43bc-a0a8-a17aa46d974b",
+      "offerId": "c06ba2b3-5b4a-4147-96b5-677a37d956f5",
+      "senderId": "15131fde-d6ec-432c-b5cd-908488234098",
+      "text": "yay",
+      "createdAt": 1776935614528
+    },
+    {
+      "id": "707a41bf-6135-4123-a4ef-1e9063a8c3f2",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "cuz im him",
+      "createdAt": 1776935836090
+    },
+    {
+      "id": "05f569e3-a1b0-442c-956b-c5cb09374ac8",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "Really",
+      "createdAt": 1776935879163
+    },
+    {
+      "id": "4224d2f2-a971-48d6-afd0-bb61531808e4",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "Really?",
+      "createdAt": 1776936085940
+    },
+    {
+      "id": "209383b4-6d60-4682-98af-65cbb3faca12",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "yep broski",
+      "createdAt": 1776936095315
+    },
+    {
+      "id": "a25aafbe-6c21-4429-b5d5-bf9a5f5d06be",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "Nahh I ain't your broski",
+      "createdAt": 1776936105683
+    },
+    {
+      "id": "1bfeb5e1-66a1-49c1-b74e-194e8310521b",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "jk",
+      "createdAt": 1776936109768
+    },
+    {
+      "id": "4042da44-785b-4825-b9fa-59b52ac2b8ec",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "anyway",
+      "createdAt": 1776936111470
+    },
+    {
+      "id": "fc9686dc-357b-4e85-bac7-81f1f234bee2",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "What?",
+      "createdAt": 1776936111719
+    },
+    {
+      "id": "e46a9cd1-df0c-41fe-a806-eb848d69a64c",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "So you wanted to build a tiktok for xxx content right?",
+      "createdAt": 1776936124182
+    },
+    {
+      "id": "0216a1a5-6b38-4a30-a494-baee6b5cd657",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "pretty odd",
+      "createdAt": 1776936125866
+    },
+    {
+      "id": "b5080348-e7bf-4808-9155-5ece78747fef",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "Thats why your mom my gf bro im your daddy",
+      "createdAt": 1776936130460
+    },
+    {
+      "id": "00f5a6fe-27a8-4952-bb30-d4a711d098f6",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "Baaaalright",
+      "createdAt": 1776936142355
+    },
+    {
+      "id": "4020250a-3fae-4ee5-b1b3-f1338e69eeeb",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "yea me and your mom can be the first",
+      "createdAt": 1776936145585
+    },
+    {
+      "id": "5da65269-6410-4fbd-867c-ccec712549af",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "1399d46a-aceb-42d0-af40-e57b546d76b9",
+      "text": "lets get started",
+      "createdAt": 1776936145783
+    },
+    {
+      "id": "3812f0bc-67f2-41aa-a8a0-3abd53502ee6",
+      "offerId": "80a1d84d-10a2-413d-b6ec-bcef1df2d3ce",
+      "senderId": "15cd7284-acd1-4754-84b7-61bcbbc90c7b",
+      "text": "bet",
+      "createdAt": 1776936152571
+    }
+  ]
+}
