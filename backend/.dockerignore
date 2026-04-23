@@ -1,2 +1,5 @@
-bpo-api
 vendor/
+go.mod
+go.sum
+main.go
+bpo-api

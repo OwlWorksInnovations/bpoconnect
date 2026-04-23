@@ -1,12 +1,12 @@
-FROM golang:1.23-alpine
+FROM alpine:latest
 
 WORKDIR /app
 
-# Copy all files including vendor
-COPY . .
+# Copy the pre-built linux binary from the repository
+COPY bpo-api-linux /bpo-api
 
-# Build using vendor folder to avoid networking
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /bpo-api .
+# Ensure it has execution permissions
+RUN chmod +x /bpo-api
 
 EXPOSE 8080
 
