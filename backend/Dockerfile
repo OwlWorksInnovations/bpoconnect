@@ -1,31 +1,18 @@
 FROM golang:1.24-bookworm AS builder
 
-# Install build essentials
-RUN apt-get update && apt-get install -y git ca-certificates && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# Set Go Proxy for better reliability
-ENV GOPROXY=https://proxy.golang.org,direct
-
-# Copy dependency files
-COPY go.mod go.sum ./
-
-# Clean cache and download
-RUN go mod download && go mod verify
-
-# Copy source code
+# Copy the entire backend directory including the vendor folder
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bpo-api
+# Build the application using the vendor folder (-mod=vendor)
+# This means the builder DOES NOT need internet access to download modules
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /bpo-api
 
-# Use a tiny image for the final run
 FROM debian:bookworm-slim
 
 WORKDIR /
 
-# Install ca-certificates (needed for TLS/external connections)
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /bpo-api /bpo-api
