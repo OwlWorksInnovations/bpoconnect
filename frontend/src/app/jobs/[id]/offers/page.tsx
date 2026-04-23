@@ -1,19 +1,17 @@
 import React from "react";
-import { getDb } from "@/lib/db";
-import { getCurrentUser, acceptOffer } from "@/app/actions";
+import { getCurrentUser, getJobById, getOffers, acceptOffer } from "@/app/actions";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 export default async function JobOffersPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const db = await getDb();
-  const job = db.jobs.find(j => j.id === id);
+  const job = await getJobById(id);
   if (!job) notFound();
 
   const user = await getCurrentUser();
   if (!user || user.id !== job.authorId) redirect('/dashboard');
 
-  const offers = db.offers.filter(o => o.jobId === job.id);
+  const offers = await getOffers(job.id);
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -31,13 +29,12 @@ export default async function JobOffersPage({ params }: { params: { id: string }
       ) : (
         <div style={{ display: "grid", gap: "1.5rem" }}>
           {offers.map(offer => {
-            const freelancer = db.users.find(u => u.id === offer.freelancerId);
             return (
               <div key={offer.id} className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border)", paddingBottom: "1rem" }}>
                   <div>
-                    <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.25rem" }}>{freelancer?.name || 'Unknown Freelancer'}</h3>
-                    <p style={{ margin: 0, fontSize: "0.9rem", color: "#666" }}>Skills: {freelancer?.tags?.join(', ') || 'None listed'}</p>
+                    <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.25rem" }}>Freelancer</h3>
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>ID: {offer.freelancerId}</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--primary)", margin: 0 }}>${offer.amount}</p>
