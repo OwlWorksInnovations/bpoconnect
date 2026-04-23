@@ -1,13 +1,18 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.24-bookworm AS builder
 
-# git is required to fetch some go modules
-RUN apk add --no-cache git
+# Install build essentials
+RUN apt-get update && apt-get install -y git ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install dependencies
+# Set Go Proxy for better reliability
+ENV GOPROXY=https://proxy.golang.org,direct
+
+# Copy dependency files
 COPY go.mod go.sum ./
-RUN go mod download
+
+# Clean cache and download
+RUN go mod download && go mod verify
 
 # Copy source code
 COPY . .
@@ -15,9 +20,13 @@ COPY . .
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bpo-api
 
-FROM alpine:latest
+# Use a tiny image for the final run
+FROM debian:bookworm-slim
 
 WORKDIR /
+
+# Install ca-certificates (needed for TLS/external connections)
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /bpo-api /bpo-api
 
