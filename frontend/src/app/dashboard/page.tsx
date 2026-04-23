@@ -1,27 +1,26 @@
 import React from "react";
 import Link from "next/link";
-import { getDb } from "@/lib/db";
-import { getCurrentUser } from "@/app/actions";
+import { getCurrentUser, getJobs, getOffers } from "@/app/actions";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
 
-  const db = await getDb();
+  const allJobs = await getJobs();
   
   let activeProjects = 0;
   let escrowBalance = 0;
   let displayItems: React.ReactNode[] = [];
 
   if (user.role === 'client') {
-    const clientJobs = db.jobs.filter(j => j.authorId === user.id);
+    const clientJobs = allJobs.filter(j => j.authorId === user.id);
     activeProjects = clientJobs.filter(j => j.status !== 'completed').length;
     escrowBalance = clientJobs.filter(j => j.status === 'in_progress').reduce((acc, curr) => acc + curr.budget, 0);
     
-    displayItems = clientJobs.map(job => {
-      const jobOffers = db.offers.filter(o => o.jobId === job.id);
-      return (
+    for (const job of clientJobs) {
+      const jobOffers = await getOffers(job.id);
+      displayItems.push(
         <div key={job.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 0", borderBottom: "1px solid var(--border)" }}>
           <div>
             <h3 style={{ margin: "0 0 0.25rem 0" }}>{job.title}</h3>
@@ -35,31 +34,35 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-      )
-    });
+      );
+    }
   } else {
-    // Freelancer
-    const freelancerOffers = db.offers.filter(o => o.freelancerId === user.id);
-    activeProjects = freelancerOffers.filter(o => o.status === 'accepted').length;
-    escrowBalance = freelancerOffers.filter(o => o.status === 'accepted').reduce((acc, curr) => acc + curr.amount, 0);
-
-    displayItems = freelancerOffers.map(offer => {
-      const job = db.jobs.find(j => j.id === offer.jobId);
-      return (
-        <div key={offer.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 0", borderBottom: "1px solid var(--border)" }}>
-          <div>
-            <h3 style={{ margin: "0 0 0.25rem 0" }}>{job?.title || 'Unknown Job'}</h3>
-            <p style={{ fontSize: "0.85rem", color: "#666", margin: 0 }}>Your Bid: ${offer.amount} • Offer Status: {offer.status}</p>
+    // Freelancer logic is harder without /api/offers/my, so we iterate all jobs
+    // In a real app, you'd have a specific endpoint for this
+    for (const job of allJobs) {
+      const offers = await getOffers(job.id);
+      const myOffer = offers.find(o => o.freelancerId === user.id);
+      if (myOffer) {
+        if (myOffer.status === 'accepted') {
+          activeProjects++;
+          escrowBalance += myOffer.amount;
+        }
+        displayItems.push(
+          <div key={myOffer.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 0", borderBottom: "1px solid var(--border)" }}>
+            <div>
+              <h3 style={{ margin: "0 0 0.25rem 0" }}>{job.title}</h3>
+              <p style={{ fontSize: "0.85rem", color: "#666", margin: 0 }}>Your Bid: ${myOffer.amount} • Status: {myOffer.status}</p>
+            </div>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <Link href={`/jobs/${job.id}`} className="btn btn-secondary">View Job</Link>
+              {myOffer.status === 'accepted' && (
+                <Link href={`/messages?offer=${myOffer.id}`} className="btn">Message Client</Link>
+              )}
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <Link href={`/jobs/${offer.jobId}`} className="btn btn-secondary">View Job</Link>
-            {offer.status === 'accepted' && (
-              <Link href={`/messages`} className="btn">Message Client</Link>
-            )}
-          </div>
-        </div>
-      )
-    });
+        );
+      }
+    }
   }
 
   return (

@@ -1,12 +1,10 @@
 import Link from "next/link";
 import React from "react";
-import { getDb } from "@/lib/db";
-import { getCurrentUser } from "@/app/actions";
+import { getCurrentUser, getJobs } from "@/app/actions";
 
 export default async function JobsPage() {
-  const db = await getDb();
   const user = await getCurrentUser();
-  const jobs = db.jobs.filter(j => j.status === 'open');
+  const jobs = await getJobs();
 
   return (
     <div>
@@ -25,7 +23,6 @@ export default async function JobsPage() {
       ) : (
         <div style={{ display: "grid", gap: "1rem" }}>
           {jobs.map((job) => {
-            const author = db.users.find(u => u.id === job.authorId);
             return (
               <div key={job.id} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
@@ -34,9 +31,9 @@ export default async function JobsPage() {
                       {job.title}
                     </Link>
                   </h2>
-                  <p style={{ color: "#666", marginBottom: "0.5rem" }}>Posted by {author?.name || 'Unknown'} • Budget: ${job.budget}</p>
+                  <p style={{ color: "#666", marginBottom: "0.5rem" }}>Budget: ${job.budget}</p>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
-                    {job.tags.map(tag => (
+                    {job.tags && job.tags.map(tag => (
                       <span key={tag} style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "0.2rem 0.5rem", borderRadius: "4px", fontSize: "0.85rem" }}>
                         {tag}
                       </span>

@@ -197,6 +197,54 @@ func main() {
 			c.JSON(http.StatusOK, offers)
 		})
 
+		api.POST("/offers/accept", func(c *gin.Context) {
+			var body struct { OfferID string `json:"offerId"` }
+			if err := c.ShouldBindJSON(&body); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			
+			// Start a transaction
+			tx, err := dbPool.Begin(context.Background())
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			defer tx.Rollback(context.Background())
+
+			// 1. Get Job ID for this offer
+			var jobID string
+			err = tx.QueryRow(context.Background(), "SELECT job_id FROM offers WHERE id = $1", body.OfferID).Scan(&jobID)
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+				return
+			}
+
+			// 2. Accept this offer
+			_, err = tx.Exec(context.Background(), "UPDATE offers SET status = 'accepted' WHERE id = $1", body.OfferID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 3. Reject other offers for same job
+			_, err = tx.Exec(context.Background(), "UPDATE offers SET status = 'rejected' WHERE job_id = $1 AND id != $2", jobID, body.OfferID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 4. Set job to in_progress
+			_, err = tx.Exec(context.Background(), "UPDATE jobs SET status = 'in_progress' WHERE id = $1", jobID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			tx.Commit(context.Background())
+			c.JSON(http.StatusOK, gin.H{"status": "success"})
+		})
+
 		// Messages
 		api.GET("/messages", func(c *gin.Context) {
 			offerID := c.Query("offerId")

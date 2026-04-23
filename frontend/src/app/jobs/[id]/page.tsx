@@ -1,21 +1,19 @@
 import React from "react";
-import { getDb } from "@/lib/db";
-import { getCurrentUser, submitOffer } from "@/app/actions";
+import { getCurrentUser, getJobById, getOffers, submitOffer } from "@/app/actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function JobDetailsPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const db = await getDb();
-  const job = db.jobs.find(j => j.id === id);
+  const job = await getJobById(id);
   
   if (!job) {
     notFound();
   }
 
-  const author = db.users.find(u => u.id === job.authorId);
   const user = await getCurrentUser();
-  const existingOffer = user ? db.offers.find(o => o.jobId === job.id && o.freelancerId === user.id) : null;
+  const jobOffers = await getOffers(job.id);
+  const existingOffer = user ? jobOffers.find(o => o.freelancerId === user.id) : null;
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -25,10 +23,10 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
       
       <div className="card">
         <h1 style={{ fontSize: "2rem", color: "var(--primary)", marginBottom: "0.5rem" }}>{job.title}</h1>
-        <p style={{ color: "#666", marginBottom: "1.5rem" }}>Posted by {author?.name || 'Unknown'} • Budget: ${job.budget}</p>
+        <p style={{ color: "#666", marginBottom: "1.5rem" }}>Budget: ${job.budget} • Status: {job.status}</p>
         
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "2rem" }}>
-          {job.tags.map(tag => (
+          {job.tags && job.tags.map(tag => (
             <span key={tag} style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "0.2rem 0.5rem", borderRadius: "4px", fontSize: "0.85rem" }}>
               {tag}
             </span>
