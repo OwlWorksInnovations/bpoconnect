@@ -149,6 +149,10 @@ export async function getOffers(jobId: string): Promise<Offer[]> {
   return apiFetch(`/api/offers?jobId=${jobId}`);
 }
 
+export async function getOffersForFreelancer(freelancerId: string): Promise<Offer[]> {
+  return apiFetch(`/api/offers?freelancerId=${freelancerId}`);
+}
+
 export async function getMessages(offerId: string): Promise<Message[]> {
   return apiFetch(`/api/messages?offerId=${offerId}`);
 }

@@ -187,7 +187,29 @@ func main() {
 
 		api.GET("/offers", func(c *gin.Context) {
 			jobID := c.Query("jobId")
-			rows, _ := dbPool.Query(context.Background(), "SELECT id, job_id, freelancer_id, amount, message, status FROM offers WHERE job_id = $1", jobID)
+			freelancerID := c.Query("freelancerId")
+			
+			var query string
+			var args []interface{}
+			
+			if jobID != "" {
+				query = "SELECT id, job_id, freelancer_id, amount, message, status FROM offers WHERE job_id = $1"
+				args = append(args, jobID)
+			} else if freelancerID != "" {
+				query = "SELECT id, job_id, freelancer_id, amount, message, status FROM offers WHERE freelancer_id = $1"
+				args = append(args, freelancerID)
+			} else {
+				c.JSON(http.StatusOK, []Offer{})
+				return
+			}
+
+			rows, err := dbPool.Query(context.Background(), query, args...)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			defer rows.Close()
+
 			offers := []Offer{}
 			for rows.Next() {
 				var o Offer

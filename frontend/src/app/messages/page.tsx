@@ -1,5 +1,5 @@
 import React from "react";
-import { getCurrentUser, getJobs, getOffers, getMessages } from "@/app/actions";
+import { getCurrentUser, getJobs, getOffers, getMessages, getOffersForFreelancer } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AutoRefresh from "./AutoRefresh";
@@ -10,12 +10,8 @@ export default async function MessagesPage({ searchParams }: { searchParams: { o
   if (!user) redirect('/login');
   
   const { offer: activeOfferId } = await searchParams;
-  
-  // To show full names, we might need more backend endpoints, but let's stick to what we have
   const allJobs = await getJobs();
   
-  // This is a bit inefficient without a specific "my-offers" endpoint, 
-  // but for MVP it works by filtering all offers of all jobs
   let involvedOffers: any[] = [];
   
   if (user.role === 'client') {
@@ -25,15 +21,14 @@ export default async function MessagesPage({ searchParams }: { searchParams: { o
       involvedOffers.push(...offers);
     }
   } else {
-    // For freelancers, we'd ideally have a /api/offers/my endpoint
-    // For now, let's just use the activeOfferId if provided
-    if (activeOfferId) {
-      // In a real app, you'd fetch the specific offer
-      // Let's assume the user is involved if they have the ID for now
-    }
+    // For freelancers, fetch all their submitted offers
+    involvedOffers = await getOffersForFreelancer(user.id);
   }
 
-  const activeOffer = involvedOffers.find(o => o.id === activeOfferId) || involvedOffers[0];
+  const activeOffer = activeOfferId 
+    ? involvedOffers.find(o => o.id === activeOfferId) 
+    : involvedOffers[0];
+    
   const messages = activeOffer ? await getMessages(activeOffer.id) : [];
 
   return (
@@ -44,7 +39,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: { o
         <h2 style={{ fontSize: "1.25rem", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem", margin: 0 }}>Conversations</h2>
         
         {involvedOffers.length === 0 ? (
-          <p style={{ color: "#666", fontSize: "0.85rem" }}>No conversations yet.</p>
+          <p style={{ color: "#666", fontSize: "0.85rem" }}>No conversations yet. Submit an offer or wait for proposals!</p>
         ) : (
           involvedOffers.map(offer => {
             const job = allJobs.find(j => j.id === offer.jobId);
@@ -61,7 +56,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: { o
                 textDecoration: "none"
               }}>
                 <h4 style={{ margin: "0 0 0.25rem 0", fontSize: "0.95rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{job?.title || 'Job'}</h4>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>Bid: ${offer.amount}</p>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>Bid: ${offer.amount} ({offer.status})</p>
               </Link>
             );
           })
@@ -109,7 +104,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: { o
           </>
         ) : (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#666" }}>
-            Select a conversation.
+            Select a conversation from the sidebar.
           </div>
         )}
       </div>
