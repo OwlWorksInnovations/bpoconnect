@@ -133,7 +133,7 @@ func main() {
 		// Jobs
 		api.GET("/jobs", func(c *gin.Context) {
 			rows, _ := dbPool.Query(context.Background(), "SELECT id, title, description, budget, tags, author_id, status FROM jobs WHERE status = 'open'")
-			var jobs []Job
+			jobs := []Job{}
 			for rows.Next() {
 				var j Job
 				rows.Scan(&j.ID, &j.Title, &j.Description, &j.Budget, &j.Tags, &j.AuthorID, &j.Status)
@@ -188,7 +188,7 @@ func main() {
 		api.GET("/offers", func(c *gin.Context) {
 			jobID := c.Query("jobId")
 			rows, _ := dbPool.Query(context.Background(), "SELECT id, job_id, freelancer_id, amount, message, status FROM offers WHERE job_id = $1", jobID)
-			var offers []Offer
+			offers := []Offer{}
 			for rows.Next() {
 				var o Offer
 				rows.Scan(&o.ID, &o.JobID, &o.FreelancerID, &o.Amount, &o.Message, &o.Status)
@@ -249,7 +249,7 @@ func main() {
 		api.GET("/messages", func(c *gin.Context) {
 			offerID := c.Query("offerId")
 			rows, _ := dbPool.Query(context.Background(), "SELECT id, offer_id, sender_id, text, created_at FROM messages WHERE offer_id = $1 ORDER BY created_at ASC", offerID)
-			var msgs []Message
+			msgs := []Message{}
 			for rows.Next() {
 				var m Message
 				rows.Scan(&m.ID, &m.OfferID, &m.SenderID, &m.Text, &m.CreatedAt)

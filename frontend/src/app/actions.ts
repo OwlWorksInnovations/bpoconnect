@@ -20,7 +20,8 @@ async function apiFetch(path: string, options: RequestInit = {}) {
     const error = await res.json().catch(() => ({ error: 'Unknown error' }));
     throw new Error(error.error || 'API request failed');
   }
-  return res.json();
+  const data = await res.json();
+  return data === null ? [] : data;
 }
 
 export async function getCurrentUser(): Promise<User | null> {
