@@ -2,12 +2,11 @@ FROM golang:1.23-alpine
 
 WORKDIR /app
 
-COPY go.mod ./
-# No dependencies to download
+# Copy all files including vendor
+COPY . .
 
-COPY main.go ./
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bpo-api main.go
+# Build using vendor folder to avoid networking
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /bpo-api .
 
 EXPOSE 8080
 
