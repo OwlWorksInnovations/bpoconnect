@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -56,6 +57,18 @@ func main() {
 	// 1. Initialize Gin
 	r := gin.Default()
 
+	// CORS Middleware (Important for separate Frontend/Backend)
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
+
 	// 2. Setup Postgres
 	dbURL := os.Getenv("DATABASE_URL")
 	dbPool, err := pgxpool.New(context.Background(), dbURL)
@@ -63,8 +76,6 @@ func main() {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer dbPool.Close()
-
-	// Run simple migrations (create tables if not exist)
 	initDB(dbPool)
 
 	// 3. Setup Redis
@@ -81,15 +92,140 @@ func main() {
 			if err := rdb.Ping(context.Background()).Err(); err != nil {
 				redisStatus = "disconnected"
 			}
-			c.JSON(http.StatusOK, gin.H{
-				"status": "ok",
-				"db":     "connected",
-				"redis":  redisStatus,
-			})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "db": "connected", "redis": redisStatus})
 		})
 
-		// TODO: Add actual CRUD endpoints for Users, Jobs, Offers, and Messages
-		// For now, keeping it lean to ensure the binary build is successful
+		// Users
+		api.POST("/users/register", func(c *gin.Context) {
+			var u User
+			if err := c.ShouldBindJSON(&u); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			u.ID = uuid.New().String()
+			_, err := dbPool.Exec(context.Background(), 
+				"INSERT INTO users (id, name, email, role, tags) VALUES ($1, $2, $3, $4, $5)",
+				u.ID, u.Name, u.Email, u.Role, u.Tags)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "User already exists or database error"})
+				return
+			}
+			c.JSON(http.StatusOK, u)
+		})
+
+		api.POST("/users/login", func(c *gin.Context) {
+			var creds struct { Email string `json:"email"` }
+			if err := c.ShouldBindJSON(&creds); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			var u User
+			err := dbPool.QueryRow(context.Background(), 
+				"SELECT id, name, email, role, tags FROM users WHERE email = $1", 
+				creds.Email).Scan(&u.ID, &u.Name, &u.Email, &u.Role, &u.Tags)
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+				return
+			}
+			c.JSON(http.StatusOK, u)
+		})
+
+		// Jobs
+		api.GET("/jobs", func(c *gin.Context) {
+			rows, _ := dbPool.Query(context.Background(), "SELECT id, title, description, budget, tags, author_id, status FROM jobs WHERE status = 'open'")
+			var jobs []Job
+			for rows.Next() {
+				var j Job
+				rows.Scan(&j.ID, &j.Title, &j.Description, &j.Budget, &j.Tags, &j.AuthorID, &j.Status)
+				jobs = append(jobs, j)
+			}
+			c.JSON(http.StatusOK, jobs)
+		})
+
+		api.POST("/jobs", func(c *gin.Context) {
+			var j Job
+			if err := c.ShouldBindJSON(&j); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			j.ID = uuid.New().String()
+			j.Status = "open"
+			_, err := dbPool.Exec(context.Background(), 
+				"INSERT INTO jobs (id, title, description, budget, tags, author_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+				j.ID, j.Title, j.Description, j.Budget, j.Tags, j.AuthorID, j.Status)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, j)
+		})
+
+		// Offers
+		api.POST("/offers", func(c *gin.Context) {
+			var o Offer
+			if err := c.ShouldBindJSON(&o); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			o.ID = uuid.New().String()
+			o.Status = "pending"
+			_, err := dbPool.Exec(context.Background(), 
+				"INSERT INTO offers (id, job_id, freelancer_id, amount, message, status) VALUES ($1, $2, $3, $4, $5, $6)",
+				o.ID, o.JobID, o.FreelancerID, o.Amount, o.Message, o.Status)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			// Automatic first message
+			msgID := uuid.New().String()
+			dbPool.Exec(context.Background(), 
+				"INSERT INTO messages (id, offer_id, sender_id, text) VALUES ($1, $2, $3, $4)",
+				msgID, o.ID, o.FreelancerID, o.Message)
+				
+			c.JSON(http.StatusOK, o)
+		})
+
+		api.GET("/offers", func(c *gin.Context) {
+			jobID := c.Query("jobId")
+			rows, _ := dbPool.Query(context.Background(), "SELECT id, job_id, freelancer_id, amount, message, status FROM offers WHERE job_id = $1", jobID)
+			var offers []Offer
+			for rows.Next() {
+				var o Offer
+				rows.Scan(&o.ID, &o.JobID, &o.FreelancerID, &o.Amount, &o.Message, &o.Status)
+				offers = append(offers, o)
+			}
+			c.JSON(http.StatusOK, offers)
+		})
+
+		// Messages
+		api.GET("/messages", func(c *gin.Context) {
+			offerID := c.Query("offerId")
+			rows, _ := dbPool.Query(context.Background(), "SELECT id, offer_id, sender_id, text, created_at FROM messages WHERE offer_id = $1 ORDER BY created_at ASC", offerID)
+			var msgs []Message
+			for rows.Next() {
+				var m Message
+				rows.Scan(&m.ID, &m.OfferID, &m.SenderID, &m.Text, &m.CreatedAt)
+				msgs = append(msgs, m)
+			}
+			c.JSON(http.StatusOK, msgs)
+		})
+
+		api.POST("/messages", func(c *gin.Context) {
+			var m Message
+			if err := c.ShouldBindJSON(&m); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			m.ID = uuid.New().String()
+			_, err := dbPool.Exec(context.Background(), 
+				"INSERT INTO messages (id, offer_id, sender_id, text) VALUES ($1, $2, $3, $4)",
+				m.ID, m.OfferID, m.SenderID, m.Text)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, m)
+		})
 	}
 
 	port := os.Getenv("PORT")
